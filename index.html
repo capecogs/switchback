@@ -572,11 +572,13 @@
          <input type="url" id="website" name="website" placeholder="https://www.yourbusiness.com">
        </div>
        <div class="form-group">
-         <label for="message">Tell us about your biggest challenge</label>
-         <textarea id="message" name="message" rows="3"></textarea>
+        <label for="message">Tell us about your biggest challenge <span aria-hidden="true">*</span></label>
+        <textarea id="message" name="message" rows="3" required minlength="10"></textarea>
        </div>
-       <div style="position:absolute;left:-5000px;" aria-hidden="true">
-         <input type="text" id="honeypot" name="honeypot" tabindex="-1" autocomplete="off">
+       <!-- Honeypot (bots only; humans can't see or tab to it) -->
+       <div class="hp-wrap" aria-hidden="true">
+        <label for="contact_time">Preferred contact time</label>
+        <input type="text" id="contact_time" name="contact_time" tabindex="-1" autocomplete="off" inputmode="text">
        </div>
        <button type="submit" class="form-submit">Schedule My Consultation</button>
      </form>
