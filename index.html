@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
  <meta charset="UTF-8" />
@@ -18,6 +17,8 @@
  <meta name="twitter:description" content="Launch your business online in 24-48 hours. Website, SEO, CRM & 5-10 automations. 847% average ROI. $1,497 start." />
  <meta name="twitter:image" content="https://images.squarespace-cdn.com/content/v1/610bf49770ba50071fee945f/40de46b0-efa7-48e4-8391-4304b1233931/ChathamOaksGrowthStack_digital.png?format=1200w" />
  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;500;700&display=swap" rel="stylesheet">
+ <!-- reCAPTCHA v3 -->
+ <script src="https://www.google.com/recaptcha/api.js?render=6Lf8gssrAAAAAD4JTSrAlcYw2oVqADHzug71WDet"></script>
  <style>
    * { margin: 0; padding: 0; box-sizing: border-box; }
    :root{
@@ -138,6 +139,7 @@
    .form-group input:focus, .form-group select:focus, .form-group textarea:focus{outline:none;border-color:var(--accent);}
    .form-submit{width:100%;padding:1rem;background:var(--accent);color:var(--white);border:none;border-radius:6px;font-size:1.125rem;font-weight:600;cursor:pointer;transition:all .2s ease;}
    .form-submit:hover{background:#477CAD;}
+   .hp-wrap{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;}
  </style>
  <script type="application/ld+json">
 {
@@ -157,6 +159,9 @@
 <body>
  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GHEVTHDDPQ"></script>
  <script>
+ // time-on-page start
+ const __pageLoadedAt = Date.now();
+
  window.dataLayer = window.dataLayer || [];
  function gtag(){dataLayer.push(arguments);}
  gtag('js', new Date());
@@ -392,7 +397,7 @@
              <li>Google My Business optimization</li>
              <li>Lead capture &amp; CRM system</li>
              <li>Local SEO setup</li>
-             <li>60‑minute onboarding &amp; training</li>
+             <li>60-minute onboarding &amp; training</li>
              <li>Required monthly management &amp; support</li>
            </ul>
          </div>
@@ -464,9 +469,9 @@
            <p>Your industry determines your automation package. Common ones include:</p>
            <ul>
              <li>Google review requests</li>
-             <li>Lead follow‑up sequences</li>
+             <li>Lead follow-up sequences</li>
              <li>Appointment reminders</li>
-             <li>Quote‑to‑payment workflows</li>
+             <li>Quote-to-payment workflows</li>
              <li>Seasonal service campaigns</li>
            </ul>
          </div>
@@ -480,7 +485,7 @@
          <div class="faq-answer">
            <ul>
              <li><strong>Switchback</strong> = Quick launch (24–48 hr) with essential automations</li>
-             <li><strong>The TREK</strong> = Year‑long partnership with strategic planning and advanced implementations</li>
+             <li><strong>The TREK</strong> = Year-long partnership with strategic planning and advanced implementations</li>
            </ul>
            <p>Many clients start with Switchback and upgrade to The TREK.</p>
          </div>
@@ -567,13 +572,18 @@
            <option value="other">Other</option>
          </select>
        </div>
+       <!-- New qualification field -->
+       <div class="form-group">
+        <label for="industry_details">Tell us more about your industry *</label>
+        <input type="text" id="industry_details" name="industry_details" required minlength="3" placeholder="e.g., Residential HVAC, Wedding Venue, Law Firm">
+       </div>
        <div class="form-group">
          <label for="website">Current Website (if any)</label>
          <input type="url" id="website" name="website" placeholder="https://www.yourbusiness.com">
        </div>
        <div class="form-group">
         <label for="message">Tell us about your biggest challenge <span aria-hidden="true">*</span></label>
-        <textarea id="message" name="message" rows="3" required minlength="10"></textarea>
+        <textarea id="message" name="message" rows="3" required minlength="30"></textarea>
        </div>
        <!-- Honeypot (bots only; humans can't see or tab to it) -->
        <div class="hp-wrap" aria-hidden="true">
@@ -705,28 +715,50 @@
 
    document.getElementById('switchbackForm').addEventListener('submit', function(e) {
      e.preventDefault();
+
+     const submitBtn = e.target.querySelector('.form-submit');
+     if (submitBtn) submitBtn.disabled = true;
      
      const formData = new FormData(e.target);
      const data = Object.fromEntries(formData);
      
      if (!data.email || !data.email.includes('@')) {
        alert('Please enter a valid email address.');
+       if (submitBtn) submitBtn.disabled = false;
        return;
      }
      
-     if (!data.phone || data.phone.length < 10) {
+     if (!data.phone || data.phone.replace(/\\D/g, '').length < 10) {
        alert('Please enter a valid phone number.');
+       if (submitBtn) submitBtn.disabled = false;
        return;
      }
      
-     if (document.getElementById('honeypot') && document.getElementById('honeypot').value) {
+     // Honeypot (correct field)
+     const hp = document.getElementById('contact_time');
+     if (hp && hp.value) {
        closeForm();
+       if (submitBtn) submitBtn.disabled = false;
+       return;
+     }
+
+     // Hidden-trap text rules
+     const msg = String(data.message || '').trim().toLowerCase();
+     const junkPhrases = ['test','testing','asdf','qwerty','n/a','na','none','nope','hello','hi'];
+     const hasJunk = junkPhrases.some(p => msg === p || msg.includes('lorem ipsum'));
+     const tooShort = msg.replace(/\\s+/g, '').length < 30;
+     const repeatedChars = /(.)\\1{7,}/.test(msg);
+     if (hasJunk || tooShort || repeatedChars) {
+       alert('Please share a bit more detail about your biggest challenge so we can help (30+ characters).');
+       if (submitBtn) submitBtn.disabled = false;
        return;
      }
      
      data.package = selectedPackageType;
      data.timestamp = new Date().toISOString();
      data.source = window.location.hostname;
+     data.time_on_page_ms = Date.now() - __pageLoadedAt;
+     data.email_domain = (data.email || '').split('@')[1] || '';
      
      const packagePrices = {
        'starter': 1497,
@@ -743,34 +775,51 @@
          'email': data.email
        });
      }
-     
-     if (CONFIG.formWebhook) {
-       fetch(CONFIG.formWebhook, {
-         method: 'POST',
-         body: JSON.stringify(data)
-       }).then(response => {
-         if (response.ok) {
-           alert('Thank you! We\'ll contact you within 24 hours to schedule your onboarding.');
-           closeForm();
-           e.target.reset();
-         } else {
-           throw new Error('Network response was not ok');
-         }
-       }).catch(() => {
-         alert('Thank you! Please check your email for confirmation. If you don\'t receive it, email hello@chathamoaks.co directly.');
-         closeForm();
-         e.target.reset();
-         
-         const subject = `Switchback ${data.package} Package Inquiry`;
-         const body = `Name: ${data.name}%0D%0ABusiness: ${data.business}%0D%0AEmail: ${data.email}%0D%0APhone: ${data.phone}%0D%0APackage: ${data.package}`;
-         window.location.href = `mailto:hello@chathamoaks.co?subject=${subject}&body=${body}`;
-       });
-     } else {
-       console.log('Form submission:', data);
-       alert('Thank you! Please email hello@chathamoaks.co to complete your signup.');
-       closeForm();
-       e.target.reset();
-     }
+
+     // reCAPTCHA v3 execute, then submit to webhook
+     grecaptcha.ready(function() {
+       grecaptcha.execute('6Lf8gssrAAAAAD4JTSrAlcYw2oVqADHzug71WDet', { action: 'switchback_form_submit' })
+         .then(function(token) {
+           data.recaptcha_token = token;
+           data.recaptcha_action = 'switchback_form_submit';
+
+           if (CONFIG.formWebhook) {
+             fetch(CONFIG.formWebhook, {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify(data)
+             }).then(response => {
+               if (response.ok) {
+                 alert('Thank you! We\\'ll contact you within 24 hours to schedule your onboarding.');
+                 closeForm();
+                 e.target.reset();
+               } else {
+                 throw new Error('Network response was not ok');
+               }
+             }).catch(() => {
+               alert('Thank you! Please check your email for confirmation. If you don\\'t receive it, email hello@chathamoaks.co directly.');
+               closeForm();
+               e.target.reset();
+               
+               const subject = `Switchback ${data.package} Package Inquiry`;
+               const body = `Name: ${data.name}%0D%0ABusiness: ${data.business}%0D%0AEmail: ${data.email}%0D%0APhone: ${data.phone}%0D%0APackage: ${data.package}`;
+               window.location.href = `mailto:hello@chathamoaks.co?subject=${subject}&body=${body}`;
+             }).finally(() => {
+               if (submitBtn) submitBtn.disabled = false;
+             });
+           } else {
+             console.log('Form submission:', data);
+             alert('Thank you! Please email hello@chathamoaks.co to complete your signup.');
+             closeForm();
+             e.target.reset();
+             if (submitBtn) submitBtn.disabled = false;
+           }
+         })
+         .catch(function() {
+           alert('reCAPTCHA validation failed. Please refresh and try again.');
+           if (submitBtn) submitBtn.disabled = false;
+         });
+     });
    });
 
    document.getElementById('formOverlay').addEventListener('click', function(e) {
